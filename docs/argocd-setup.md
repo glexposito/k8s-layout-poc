@@ -63,7 +63,7 @@ place.
 
 Everything in `manifests/` is static YAML k3s auto-applies with zero
 external dependencies. Argo CD's install and cross-cluster registration
-can't work that way, for two separate reasons:
+can't work that way, for three separate reasons:
 
 - **Installing Argo CD** is `kubectl apply -f <official install.yaml>` —
   an imperative command, not a resource k3s's manifest watcher can trigger
@@ -74,9 +74,82 @@ can't work that way, for two separate reasons:
   git-committed file, since it doesn't exist until the cluster is actually
   running. Something has to read a live value out of one cluster and write
   it into the other.
+- **Prod's Argo CD needs to actually reach `nonprod` by name**, and
+  docker-compose's container-name DNS doesn't reach inside pods (see
+  below) — something has to discover `nonprod`'s current docker-network IP
+  and teach prod's CoreDNS about it, since that IP also isn't stable across
+  restarts.
 
 That "something" is `scripts/bootstrap-argocd.sh`, run once after
 `docker compose up -d`.
+
+## Three real bugs this hit, and the actual fixes
+
+Worth documenting since all three were non-obvious and each took real
+diagnosis - useful if this breaks again after an Argo CD version bump or a
+docker-compose network change.
+
+**Bug 1: the official install manifest is hardcoded for the `argocd`
+namespace, including inside RBAC.** `kubectl apply -n chaos-prod -f
+install.yaml` looked like it should work - `-n` redirects any resource
+that doesn't specify its own namespace. But the manifest's
+`ClusterRoleBinding`s have an *explicit* `subjects[].namespace: argocd`,
+which `-n` does not touch. Result: `argocd-application-controller` ran in
+`chaos-prod`, but the only RBAC binding for that identity pointed at
+`system:serviceaccount:argocd:argocd-application-controller` - a different
+identity - so it had no real permissions and every Application failed with
+`namespaces is forbidden ... at the cluster scope`.
+
+The fix is `scripts/argocd-kustomize/kustomization.yaml`: kustomize's
+namespace transformer rewrites `RoleBinding` subjects automatically, but
+**not** `ClusterRoleBinding` subjects (a cluster-scoped binding isn't
+assumed to belong to the target namespace) - confirmed by rendering the
+kustomization and checking the output still said `namespace: argocd`
+without an explicit patch. Three JSON6902 patches fix the three affected
+ClusterRoleBindings (`argocd-application-controller`,
+`argocd-applicationset-controller`, `argocd-server`).
+
+**Bug 2: docker-compose's DNS doesn't reach inside pods.** `k3s-nonprod`
+resolves fine from the `k3s-prod` *container's* own shell (Docker's
+embedded resolver, `127.0.0.11`, handles container-name lookups on the
+shared network) - but Argo CD's `application-controller` runs as a *pod*,
+in its own network namespace created by the CNI, and `127.0.0.11` is
+loopback-scoped to the container's namespace, not reachable from a pod's.
+Prod's CoreDNS forwards unresolved queries to `/etc/resolv.conf`, which
+also just says `127.0.0.11` - equally unreachable from inside CoreDNS's
+own pod.
+
+The fix is a `coredns-custom` ConfigMap (k3s's documented CoreDNS
+customization point, survives k3s's own reconciliation of the base
+`coredns` ConfigMap) with a `template` plugin matching `^k3s-nonprod\.`
+and answering with nonprod's current docker-network IP, discovered via
+`docker inspect` at bootstrap time. Two syntax notes that cost real time
+here: the base Corefile already has one `hosts` plugin block, and CoreDNS
+only allows one per server block, so a second `hosts` block conflicts -
+`template` was used instead. And `template IN A <token> { ... }` treats
+`<token>` as a *zone* argument, not a label - omit it entirely to default
+to the root zone, otherwise the block silently never matches anything.
+
+**Bug 3: `argocd-application-controller` gets OOMKilled managing a second
+cluster, silently.** After bugs 1 and 2 were fixed, `nonprod`-targeting
+Applications still never synced - they sat with completely empty
+`status` forever, no error, no condition, nothing. The actual clue wasn't
+in any Application's status at all: `kubectl get pod
+argocd-application-controller-0 -o
+jsonpath='{.status.containerStatuses[0].lastState.terminated}'` showed
+`"reason":"OOMKilled"`. A `SIGKILL` gives a process no chance to log
+anything, so the crash was invisible anywhere an Application's own status
+or events would show it - only the pod's own restart count (climbing) and
+termination reason revealed it.
+
+The official install manifest sets no `resources` on
+`argocd-application-controller` at all, so it silently inherited
+`chaos-prod`'s own `LimitRange` default (`200m`/`256Mi` - sized for this
+repo's lightweight demo apps, not a control-plane component caching two
+clusters' full resource state). The fix is a kustomize patch that `add`s
+(not `replace`s - there's nothing to replace, the field doesn't exist in
+the base manifest) explicit resources to the StatefulSet, well above the
+namespace default: `250m`/`384Mi` request, `500m`/`768Mi` limit.
 
 ## File by file
 
