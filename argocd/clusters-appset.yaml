@@ -24,7 +24,7 @@ spec:
         environment: '{{cluster}}'
         layer: governance
     spec:
-      project: default
+      project: platform
       source:
         repoURL: https://github.com/glexposito/k8s-layout-poc.git
         targetRevision: HEAD

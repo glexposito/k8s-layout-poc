@@ -92,6 +92,12 @@ The `argocd/` directory holds the app-of-apps bootstrap:
   respectively), each deploying across that pillar's four stage namespaces
   on both clusters. One file per app, so adding/removing an app's rollout
   is a self-contained change.
+- `projects/platform.yaml`, `projects/marines.yaml`,
+  `projects/necrons.yaml`, `projects/chaos.yaml` — `AppProject`s scoping
+  what each Application is actually allowed to touch: `platform` (the
+  governance layer above) can create cluster-scoped resources like
+  `Namespace`; each pillar's project is restricted to only that pillar's
+  own namespaces, with no cluster-scoped access at all.
 
 All of these reference this repo's real remote
 (`https://github.com/glexposito/k8s-layout-poc.git`) as `repoURL`, so they

@@ -32,7 +32,7 @@ spec:
         stage: '{{stage}}'
         environment: '{{environment}}'
     spec:
-      project: default
+      project: marines
       source:
         repoURL: https://github.com/glexposito/k8s-layout-poc.git
         targetRevision: HEAD

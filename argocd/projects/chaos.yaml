@@ -1,0 +1,26 @@
+# chaos pillar: restricted to its own namespaces across both clusters,
+# no cluster-scoped access at all - a bad/malicious Application targeting
+# another pillar's namespace, or trying to create a ClusterRole, would be
+# rejected by Argo CD before it ever touches the cluster.
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: chaos
+  namespace: chaos-prod
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  description: chaos pillar - owns chaos-dev/qa/stg/prod only.
+  sourceRepos:
+    - https://github.com/glexposito/k8s-layout-poc.git
+  destinations:
+    - server: https://k3s-nonprod:6443
+      namespace: 'chaos-*'
+    - server: https://kubernetes.default.svc
+      namespace: 'chaos-*'
+  clusterResourceWhitelist: []
+  namespaceResourceWhitelist:
+    - group: apps
+      kind: Deployment
+    - group: ''
+      kind: Service
