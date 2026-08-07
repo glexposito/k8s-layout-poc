@@ -1,6 +1,9 @@
 nameOverride: ""
 fullnameOverride: ""
 
+# app.kubernetes.io/part-of - the pillar this app belongs to.
+partOf: chaos
+
 replicaCount: 1
 
 image:
