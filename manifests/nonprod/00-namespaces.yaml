@@ -1,0 +1,70 @@
+# Namespaces for the nonprod cluster: one per pillar per stage, including
+# core (platform tooling is a pillar too). dev/qa are internal-only and safe
+# to break - they exist to catch app and infra/config issues before anything
+# reaches a customer (see README "Namespace design rationale").
+# cost-center values are illustrative placeholders, not real Finance codes.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: consumer-dev
+  labels:
+    environment: nonprod
+    stage: dev
+    pillar: consumer
+    cost-center: cc-1001
+    managed-by: k8s-layout-poc
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: consumer-qa
+  labels:
+    environment: nonprod
+    stage: qa
+    pillar: consumer
+    cost-center: cc-1001
+    managed-by: k8s-layout-poc
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: engagement-dev
+  labels:
+    environment: nonprod
+    stage: dev
+    pillar: engagement
+    cost-center: cc-1002
+    managed-by: k8s-layout-poc
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: engagement-qa
+  labels:
+    environment: nonprod
+    stage: qa
+    pillar: engagement
+    cost-center: cc-1002
+    managed-by: k8s-layout-poc
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: core-dev
+  labels:
+    environment: nonprod
+    stage: dev
+    pillar: core
+    cost-center: cc-1000
+    managed-by: k8s-layout-poc
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: core-qa
+  labels:
+    environment: nonprod
+    stage: qa
+    pillar: core
+    cost-center: cc-1000
+    managed-by: k8s-layout-poc

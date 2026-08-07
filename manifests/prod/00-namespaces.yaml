@@ -1,0 +1,72 @@
+# Namespaces for the prod cluster: one per pillar per stage, including core
+# (platform tooling is a pillar too). stg and prod are both customer-facing
+# here - stg is a canary gate for prod, not a throwaway test tier, so both
+# get the same quota/RBAC rigor (see README "Namespace design rationale").
+# `core-prod` is reserved for Argo CD once it's installed on this cluster
+# (see "Roadmap"). cost-center values are illustrative placeholders, not
+# real Finance codes.
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: consumer-stg
+  labels:
+    environment: prod
+    stage: stg
+    pillar: consumer
+    cost-center: cc-1001
+    managed-by: k8s-layout-poc
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: consumer-prod
+  labels:
+    environment: prod
+    stage: prod
+    pillar: consumer
+    cost-center: cc-1001
+    managed-by: k8s-layout-poc
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: engagement-stg
+  labels:
+    environment: prod
+    stage: stg
+    pillar: engagement
+    cost-center: cc-1002
+    managed-by: k8s-layout-poc
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: engagement-prod
+  labels:
+    environment: prod
+    stage: prod
+    pillar: engagement
+    cost-center: cc-1002
+    managed-by: k8s-layout-poc
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: core-stg
+  labels:
+    environment: prod
+    stage: stg
+    pillar: core
+    cost-center: cc-1000
+    managed-by: k8s-layout-poc
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: core-prod
+  labels:
+    environment: prod
+    stage: prod
+    pillar: core
+    cost-center: cc-1000
+    managed-by: k8s-layout-poc
