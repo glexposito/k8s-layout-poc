@@ -1,0 +1,25 @@
+# App-of-apps bootstrap: the one Application applied manually (by
+# scripts/bootstrap-argocd.sh), pointing at this argocd/ directory itself.
+# Once this exists, everything else in here (the ApplicationSets below,
+# and whatever they generate) is picked up and synced automatically -
+# no further manual kubectl apply needed.
+#
+# TODO: replace repoURL once this repo has a real remote.
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: root
+  namespace: chaos-prod
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/REPLACE_ME/k8s-layout-poc.git
+    targetRevision: HEAD
+    path: argocd
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: chaos-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true

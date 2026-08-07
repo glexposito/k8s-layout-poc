@@ -35,6 +35,7 @@ services:
 
     ports:
       - "6445:6443"
+      - "9000:9000"   # Argo CD UI, exposed by scripts/bootstrap-argocd.sh
 
     volumes:
       - prod-data:/var/lib/rancher/k3s

@@ -1,0 +1,6 @@
+apiVersion: v2
+name: immortal
+description: Helm chart for deploying immortal (necrons pillar example app)
+type: application
+version: 0.1.0
+appVersion: "latest"
