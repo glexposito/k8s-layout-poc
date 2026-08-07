@@ -2,8 +2,6 @@
 # own namespaces across both clusters - dev/qa in nonprod, stg/prod in
 # prod. This is the multi-cluster-from-one-Argo-CD piece: dev/qa target the
 # registered remote cluster, stg/prod target the in-cluster address.
-#
-# TODO: replace repoURL once this repo has a real remote.
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -28,7 +26,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/REPLACE_ME/k8s-layout-poc.git
+        repoURL: https://github.com/glexposito/k8s-layout-poc.git
         targetRevision: HEAD
         path: charts/havoc
         helm:

@@ -3,8 +3,6 @@
 # Once this exists, everything else in here (the ApplicationSets below,
 # and whatever they generate) is picked up and synced automatically -
 # no further manual kubectl apply needed.
-#
-# TODO: replace repoURL once this repo has a real remote.
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -13,7 +11,7 @@ metadata:
 spec:
   project: default
   source:
-    repoURL: https://github.com/REPLACE_ME/k8s-layout-poc.git
+    repoURL: https://github.com/glexposito/k8s-layout-poc.git
     targetRevision: HEAD
     path: argocd
   destination:

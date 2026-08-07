@@ -93,10 +93,10 @@ The `argocd/` directory holds the app-of-apps bootstrap:
   on both clusters. One file per app, so adding/removing an app's rollout
   is a self-contained change.
 
-All of these reference this repo by `repoURL` — replace the `REPLACE_ME`
-placeholder in each file with this repo's real remote URL before they'll
-actually sync (until then, the root `Application` shows as errored, which
-is expected). For the full file-by-file breakdown and how the cross-cluster
+All of these reference this repo's real remote
+(`https://github.com/glexposito/k8s-layout-poc.git`) as `repoURL`, so they
+sync as-is once Argo CD is running. For the full file-by-file breakdown and
+how the cross-cluster
 credential bridging actually connects everything, see
 [docs/argocd-setup.md](docs/argocd-setup.md).
 

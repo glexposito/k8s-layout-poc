@@ -172,9 +172,9 @@ the bootstrap script would have no real token to read, the cluster Secret
 it builds would be invalid, and every `Application` targeting `nonprod`
 would fail to authenticate even though the URL still matches.
 
-## TODO before this actually syncs anything
+## Status
 
 `argocd/root-app.yaml`, `argocd/clusters-appset.yaml`, and all three
-`argocd/*-appset.yaml` files reference this repo via `repoURL`, currently
-a `REPLACE_ME` placeholder. Replace it with this repo's real remote URL —
-until then, the root `Application` shows as errored, which is expected.
+`argocd/*-appset.yaml` files reference this repo's real remote
+(`https://github.com/glexposito/k8s-layout-poc.git`) as `repoURL` — they
+sync as-is once `scripts/bootstrap-argocd.sh` has run.

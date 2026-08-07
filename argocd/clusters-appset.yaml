@@ -2,9 +2,7 @@
 # directory from this repo (namespaces, quotas, RBAC, network policies) -
 # the same content k3s's own auto-deploy mechanism applies today, now
 # managed via GitOps instead. This is the governance layer; actual app
-# workloads are handled separately by apps-appset.yaml.
-#
-# TODO: replace repoURL once this repo has a real remote.
+# workloads are handled separately by intercessor/immortal/havoc-appset.yaml.
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -25,7 +23,7 @@ spec:
     spec:
       project: default
       source:
-        repoURL: https://github.com/REPLACE_ME/k8s-layout-poc.git
+        repoURL: https://github.com/glexposito/k8s-layout-poc.git
         targetRevision: HEAD
         path: 'manifests/{{cluster}}'
       destination:
