@@ -1,72 +1,72 @@
-# Namespaces for the prod cluster: one per pillar per stage, including core
+# Namespaces for the prod cluster: one per pillar per stage, including chaos
 # (platform tooling is a pillar too). stg and prod are both customer-facing
 # here - stg is a canary gate for prod, not a throwaway test tier, so both
 # get the same quota/RBAC rigor (see README "Namespace design rationale").
-# `core-prod` is reserved for Argo CD once it's installed on this cluster
+# `chaos-prod` is reserved for Argo CD once it's installed on this cluster
 # (see "Roadmap"). cost-center values are illustrative placeholders, not
 # real Finance codes.
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: consumer-stg
+  name: marines-stg
   labels:
     environment: prod
     stage: stg
-    pillar: consumer
+    pillar: marines
     cost-center: cc-1001
     managed-by: k8s-layout-poc
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: consumer-prod
+  name: marines-prod
   labels:
     environment: prod
     stage: prod
-    pillar: consumer
+    pillar: marines
     cost-center: cc-1001
     managed-by: k8s-layout-poc
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: engagement-stg
+  name: necrons-stg
   labels:
     environment: prod
     stage: stg
-    pillar: engagement
+    pillar: necrons
     cost-center: cc-1002
     managed-by: k8s-layout-poc
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: engagement-prod
+  name: necrons-prod
   labels:
     environment: prod
     stage: prod
-    pillar: engagement
+    pillar: necrons
     cost-center: cc-1002
     managed-by: k8s-layout-poc
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: core-stg
+  name: chaos-stg
   labels:
     environment: prod
     stage: stg
-    pillar: core
+    pillar: chaos
     cost-center: cc-1000
     managed-by: k8s-layout-poc
 ---
 apiVersion: v1
 kind: Namespace
 metadata:
-  name: core-prod
+  name: chaos-prod
   labels:
     environment: prod
     stage: prod
-    pillar: core
+    pillar: chaos
     cost-center: cc-1000
     managed-by: k8s-layout-poc

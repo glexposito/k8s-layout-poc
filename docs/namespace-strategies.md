@@ -5,6 +5,11 @@ This documents the namespace granularity spectrum considered for this repo
 did. It's a reference for revisiting the decision later, not instructions
 for running the PoC (see the main [README](../README.md) for that).
 
+`marines`, `necrons`, `chaos`, `app-1`, `app-2`, etc. are placeholder names,
+not this org's actual team/product names — the point is the *pattern*
+(ownership axis + risk-tier axis, and what forces a namespace boundary),
+which maps onto whatever your real pillars and apps are called.
+
 ## Why namespaces exist at all
 
 Every option below is a different answer to the same question: where do you
@@ -39,8 +44,8 @@ Further reading, all consistent with this framing:
 | Strategy                        | Example                             | What lives inside                                  | When it fits                                                          | Trade-off                                                                  |
 | -------------------------------- | ------------------------------------ | ---------------------------------------------------- | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------- |
 | Per environment                  | `dev`, `stg`, `prod`                 | Every workload from every team, grouped by stage only | Small clusters, one team, environment is the only boundary that matters  | No per-team RBAC/quota isolation — one noisy tenant affects everyone          |
-| **Pillar/team + environment**    | `consumer-stg`, `core-prod`          | Everything a pillar owns, for one specific stage      | You want team ownership *and* environment risk tier as the boundary       | More namespaces to manage (pillars × stages); still coarse if a pillar owns many independent apps |
-| Workload/application + environment | `audience-builder-stg`, `audience-builder-prod` | One app's full stack, for one specific stage           | Strong workload isolation *and* environment separation, at any team-ownership shape | Namespace count grows fast (apps × stages); needs a separate ownership/RBAC mechanism if teams own multiple apps |
+| **Pillar/team + environment**    | `marines-stg`, `chaos-prod`          | Everything a pillar owns, for one specific stage      | You want team ownership *and* environment risk tier as the boundary       | More namespaces to manage (pillars × stages); still coarse if a pillar owns many independent apps |
+| Workload/application + environment | `app-1-stg`, `app-1-prod` | One app's full stack, for one specific stage           | Strong workload isolation *and* environment separation, at any team-ownership shape | Namespace count grows fast (apps × stages); needs a separate ownership/RBAC mechanism if teams own multiple apps |
 
 ## 1. Environment-only
 
@@ -60,10 +65,10 @@ Applications then live in the *resource names*, not the namespace name:
 
 ```
 stg
-├── audience-builder-api
-├── merchant-api
-├── status-page
-└── activities-api
+├── app-1-api
+├── app-3
+├── app-2
+└── app-4
 ```
 
 ...and pillar ownership moves into labels instead of the namespace boundary:
@@ -71,13 +76,13 @@ stg
 ```yaml
 metadata:
   labels:
-    app.kubernetes.io/name: status-page
-    pillar: core
+    app.kubernetes.io/name: app-2
+    pillar: chaos
 ```
 
 This is the simplest model, but it's also the one that loses the property
 we specifically needed: `ResourceQuota` and `RoleBinding` can't target "all
-resources labeled `pillar: core`" — they attach to a namespace. With
+resources labeled `pillar: chaos`" — they attach to a namespace. With
 everything sharing `stg`, there's no independent budget or access boundary
 per pillar; one noisy tenant can still starve the others.
 
@@ -85,20 +90,20 @@ per pillar; one noisy tenant can still starve the others.
 
 ```
 nonprod cluster
-├── consumer-dev
-├── consumer-qa
-├── engagement-dev
-├── engagement-qa
-├── core-dev
-└── core-qa
+├── marines-dev
+├── marines-qa
+├── necrons-dev
+├── necrons-qa
+├── chaos-dev
+└── chaos-qa
 
 prod cluster
-├── consumer-stg
-├── consumer-prod
-├── engagement-stg
-├── engagement-prod
-├── core-stg
-└── core-prod
+├── marines-stg
+├── marines-prod
+├── necrons-stg
+├── necrons-prod
+├── chaos-stg
+└── chaos-prod
 ```
 
 Each namespace holds everything that pillar owns for that one stage —
@@ -111,8 +116,8 @@ boundary in Kubernetes — `ResourceQuota` and `RoleBinding` — are both
 namespace-scoped objects with no cross-namespace label equivalent. The two
 axes that map to real organizational needs here are:
 
-- **Pillar** — who owns it, what their budget/access is (`consumer`,
-  `engagement`, `core` are each accountable units).
+- **Pillar** — who owns it, what their budget/access is (`marines`,
+  `necrons`, `chaos` are each accountable units).
 - **Stage** — blast radius / customer risk. `dev`/`qa` are internal and
   safe to break; `stg`/`prod` are both customer-facing in this org (see the
   main README's "Namespace design rationale" for the full reasoning on why
@@ -136,7 +141,7 @@ Deployment.** A workload/application namespace still holds everything that
 one app needs — it's just scoped to one app instead of one whole pillar:
 
 ```
-audience-builder-stg
+app-1-stg
 ├── Deployment: api
 ├── Deployment: worker
 ├── Deployment: scheduler
@@ -152,21 +157,21 @@ Compare that to how the same app would sit under this repo's current model
 pillar owns:
 
 ```
-consumer-stg
-├── audience-builder  (Deployment: api, worker, scheduler, monitoring; Service: api)
-├── status-page       (Deployment: web; Service: web)
-└── ...whatever else the consumer pillar owns, all sharing one quota
+marines-stg
+├── app-1  (Deployment: api, worker, scheduler, monitoring; Service: api)
+├── app-2  (Deployment: web; Service: web)
+└── ...whatever else the marines pillar owns, all sharing one quota
 ```
 
-The workload-level split gives `audience-builder` and `status-page`
+The workload-level split gives `app-1` and `app-2`
 independent quotas, secrets scopes, and lifecycles from each other, even
-though both belong to `consumer`. The cost: namespace count grows to
+though both belong to `marines`. The cost: namespace count grows to
 (pillars × apps × stages) instead of (pillars × stages).
 
 ### When to escalate to per-workload
 
 Add a workload axis (`<pillar>-<workload>-<stage>`, e.g.
-`consumer-checkout-stg`) once a single pillar owns multiple apps that need
+`marines-checkout-stg`) once a single pillar owns multiple apps that need
 independent blast radius from *each other* — not just from other pillars.
 Signs it's time:
 
@@ -178,10 +183,11 @@ Signs it's time:
 - Apps under one pillar have independent release cadences and you want to
   delete/rebuild one without touching siblings.
 
-Don't do this preemptively — this repo currently has one example workload
-per pillar (`consumer-dev/hello-web`), so pillar-level and workload-level
-namespacing look identical today. It's only worth the added namespace count
-once a pillar's actual footprint needs the extra isolation.
+Don't do this preemptively — this repo currently has no example workloads
+deployed at all, just the empty namespace/quota/RBAC layer, so pillar-level
+and workload-level namespacing would look identical either way today. It's
+only worth the added namespace count once a pillar's actual footprint needs
+the extra isolation.
 
 ## Pool vs. silo: why this repo uses both
 
@@ -202,14 +208,14 @@ This repo doesn't pick one — it applies **silo at the environment axis** and
 silo boundary (fully separate clusters/control planes)
 ├── nonprod cluster
 │    └── pool boundary (shared cluster, isolated by namespace)
-│         ├── consumer-dev
-│         ├── engagement-dev
-│         └── core-dev
+│         ├── marines-dev
+│         ├── necrons-dev
+│         └── chaos-dev
 └── prod cluster
      └── pool boundary (shared cluster, isolated by namespace)
-          ├── consumer-prod
-          ├── engagement-prod
-          └── core-prod
+          ├── marines-prod
+          ├── necrons-prod
+          └── chaos-prod
 ```
 
 - **Silo, for environment risk.** `nonprod` and `prod` are two entirely
@@ -218,8 +224,8 @@ silo boundary (fully separate clusters/control planes)
   reach `prod`. This is the highest-cost isolation tool, so it's reserved
   for the boundary with the highest stakes: internal/safe-to-break vs.
   customer-facing.
-- **Pool, for pillar ownership.** Within one cluster, `consumer`,
-  `engagement`, and `core` share the same nodes and control plane, kept
+- **Pool, for pillar ownership.** Within one cluster, `marines`,
+  `necrons`, and `chaos` share the same nodes and control plane, kept
   apart logically — namespace + `ResourceQuota` + `NetworkPolicy` per
   pillar, exactly the pattern in `manifests/*/01-policies.yaml`. Cheaper
   than a cluster per pillar, and sufficient because one pillar's bug

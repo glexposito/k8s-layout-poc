@@ -8,7 +8,7 @@ apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: pillar-quota
-  namespace: consumer-dev
+  namespace: marines-dev
 spec:
   hard:
     requests.cpu: "1"
@@ -21,7 +21,7 @@ apiVersion: v1
 kind: LimitRange
 metadata:
   name: default-limits
-  namespace: consumer-dev
+  namespace: marines-dev
 spec:
   limits:
     - type: Container
@@ -36,7 +36,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-same-namespace-only
-  namespace: consumer-dev
+  namespace: marines-dev
 spec:
   podSelector: {}
   policyTypes:
@@ -49,7 +49,7 @@ apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: pillar-quota
-  namespace: consumer-qa
+  namespace: marines-qa
 spec:
   hard:
     requests.cpu: "2"
@@ -62,7 +62,7 @@ apiVersion: v1
 kind: LimitRange
 metadata:
   name: default-limits
-  namespace: consumer-qa
+  namespace: marines-qa
 spec:
   limits:
     - type: Container
@@ -77,7 +77,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-same-namespace-only
-  namespace: consumer-qa
+  namespace: marines-qa
 spec:
   podSelector: {}
   policyTypes:
@@ -90,7 +90,7 @@ apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: pillar-quota
-  namespace: engagement-dev
+  namespace: necrons-dev
 spec:
   hard:
     requests.cpu: "1"
@@ -103,7 +103,7 @@ apiVersion: v1
 kind: LimitRange
 metadata:
   name: default-limits
-  namespace: engagement-dev
+  namespace: necrons-dev
 spec:
   limits:
     - type: Container
@@ -118,7 +118,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-same-namespace-only
-  namespace: engagement-dev
+  namespace: necrons-dev
 spec:
   podSelector: {}
   policyTypes:
@@ -131,7 +131,7 @@ apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: pillar-quota
-  namespace: engagement-qa
+  namespace: necrons-qa
 spec:
   hard:
     requests.cpu: "2"
@@ -144,7 +144,7 @@ apiVersion: v1
 kind: LimitRange
 metadata:
   name: default-limits
-  namespace: engagement-qa
+  namespace: necrons-qa
 spec:
   limits:
     - type: Container
@@ -159,7 +159,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-same-namespace-only
-  namespace: engagement-qa
+  namespace: necrons-qa
 spec:
   podSelector: {}
   policyTypes:
@@ -172,7 +172,7 @@ apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: pillar-quota
-  namespace: core-dev
+  namespace: chaos-dev
 spec:
   hard:
     requests.cpu: "1"
@@ -185,7 +185,7 @@ apiVersion: v1
 kind: LimitRange
 metadata:
   name: default-limits
-  namespace: core-dev
+  namespace: chaos-dev
 spec:
   limits:
     - type: Container
@@ -200,7 +200,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-same-namespace-only
-  namespace: core-dev
+  namespace: chaos-dev
 spec:
   podSelector: {}
   policyTypes:
@@ -213,7 +213,7 @@ apiVersion: v1
 kind: ResourceQuota
 metadata:
   name: pillar-quota
-  namespace: core-qa
+  namespace: chaos-qa
 spec:
   hard:
     requests.cpu: "2"
@@ -226,7 +226,7 @@ apiVersion: v1
 kind: LimitRange
 metadata:
   name: default-limits
-  namespace: core-qa
+  namespace: chaos-qa
 spec:
   limits:
     - type: Container
@@ -241,7 +241,7 @@ apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
   name: allow-same-namespace-only
-  namespace: core-qa
+  namespace: chaos-qa
 spec:
   podSelector: {}
   policyTypes:
