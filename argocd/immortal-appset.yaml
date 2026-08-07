@@ -12,17 +12,25 @@ spec:
     - list:
         elements:
           - stage: dev
+            environment: nonprod
             server: https://k3s-nonprod:6443
           - stage: qa
+            environment: nonprod
             server: https://k3s-nonprod:6443
           - stage: stg
+            environment: prod
             server: https://kubernetes.default.svc
           - stage: prod
+            environment: prod
             server: https://kubernetes.default.svc
   template:
     metadata:
       name: 'immortal-{{stage}}'
       namespace: chaos-prod
+      labels:
+        pillar: necrons
+        stage: '{{stage}}'
+        environment: '{{environment}}'
     spec:
       project: default
       source:

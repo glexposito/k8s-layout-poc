@@ -8,6 +8,9 @@ kind: Application
 metadata:
   name: root
   namespace: chaos-prod
+  labels:
+    pillar: chaos
+    layer: bootstrap
 spec:
   project: default
   source:

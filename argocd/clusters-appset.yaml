@@ -20,6 +20,9 @@ spec:
     metadata:
       name: 'manifests-{{cluster}}'
       namespace: chaos-prod
+      labels:
+        environment: '{{cluster}}'
+        layer: governance
     spec:
       project: default
       source:
