@@ -1,9 +1,9 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "havoc.fullname" . }}
+  name: {{ include "common.fullname" . }}
   labels:
-    {{- include "havoc.labels" . | nindent 4 }}
+    {{- include "common.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   strategy:
@@ -13,14 +13,14 @@ spec:
       maxSurge: {{ .Values.rollingUpdate.maxSurge }}
   selector:
     matchLabels:
-      {{- include "havoc.selectorLabels" . | nindent 6 }}
+      {{- include "common.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        {{- include "havoc.selectorLabels" . | nindent 8 }}
+        {{- include "common.selectorLabels" . | nindent 8 }}
     spec:
       containers:
-        - name: {{ include "havoc.name" . }}
+        - name: {{ include "common.name" . }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
