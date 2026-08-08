@@ -22,5 +22,9 @@ spec:
   namespaceResourceWhitelist:
     - group: apps
       kind: Deployment
+    - group: apps
+      kind: ReplicaSet
     - group: ''
       kind: Service
+    - group: ''
+      kind: Pod
